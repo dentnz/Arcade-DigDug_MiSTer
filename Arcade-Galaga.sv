@@ -86,7 +86,7 @@ assign HDMI_ARY = status[1] ? 8'd9  : status[2] ? 8'd3 : 8'd1;
 
 `include "build_id.v" 
 localparam CONF_STR = {
-	"A.GALAGA;;",
+	"A.DIGDUG;;",
 	"-;",
 	"O1,Aspect Ratio,Original,Wide;",
 	"O2,Orientation,Vert,Horz;",
