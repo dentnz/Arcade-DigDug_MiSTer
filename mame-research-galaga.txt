@@ -1,0 +1,140 @@
+Galaga PCBs:
+------------
+
+CPU board:
+06XX     interface to custom 5xXX
+07XX     clock divider
+08XX(x3) bus controller
+51XX     I/O
+54XX     explosion sound generator
+
+Video board:
+00XX     tilemap address generator with scrolling capability (only Super Pacman)
+02XX     gfx data shifter and mixer (16-bit in, 4-bit out)
+04XX     sprite address generator
+05XX     starfield generator
+07XX     clock divider
+
+Galaga Memory Map:
+------------------
+
+MAIN CPU:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 3N    program ROM
+0001xxxxxxxxxxxx R   xxxxxxxx ROM 3M    program ROM
+0010xxxxxxxxxxxx R   xxxxxxxx ROM 3L    program ROM
+0011xxxxxxxxxxxx R   xxxxxxxx ROM 3K    program ROM
+the rest of the memory map is common to the other CPUs
+
+SUB CPU:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 3J    program ROM
+0001------------              n.c.
+0010------------              n.c.
+0011------------              n.c.
+the rest of the memory map is common to the other CPUs
+
+SOUND CPU:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 3E    program ROM
+0001------------              n.c.
+0010------------              n.c.
+0011------------              n.c.
+the rest of the memory map is common to the other CPUs
+
+COMMON:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+01000-----------              n.c.
+01001-----------              n.c.
+01010-----------              n.c.
+01011-----------              n.c.
+01100-----------              n.c.
+01101-----00----   W ----xxxx RAM 2A    \ sound control registers
+01101-----01----   W ----xxxx RAM 2B    /
+01101-----10-000   W -------x IRQ1      main CPU irq enable/acknowledge
+01101-----10-001   W -------x IRQ2      motion CPU irq enable/acknowledge
+01101-----10-010   W -------x NMION     sound CPU nmi enable
+01101-----10-011   W -------x RESET     reset sub and sound CPU, and 5xXX chips on CPU board
+01101-----10-100   W -------x n.c.
+01101-----10-101   W -------x MOD 0     unused?
+01101-----10-110   W -------x MOD 1     unused?
+01101-----10-111   W -------x MOD 2     unused?
+01101-----11----   W -------- WDR       watchdog reset
+01101-----00-xxx R   -------x DIP SW    dip switch B
+01101-----00-xxx R   ------x- DIP SW    dip switch A
+01101-----01---- R            n.c.
+01101-----10---- R            n.c.
+01101-----11---- R            n.c.
+01110--0-------- R/W xxxxxxxx I/O       custom 06XX data
+01110--1-------- R/W xxxxxxxx I/O       custom 06XX control
+10000xxxxxxxxxxx R/W xxxxxxxx RAM 1K    tilemap RAM
+10001-xxxxxxxxxx R/W xxxxxxxx RAM 3E/3F work RAM
+10001-111xxxxxxx R/W xxxxxxxx           portion holding sprite registers
+10010-xxxxxxxxxx R/W xxxxxxxx RAM 3K/3L work RAM
+10010-111xxxxxxx R/W xxxxxxxx           portion holding sprite registers
+10011-xxxxxxxxxx R/W xxxxxxxx RAM 3H/3J work RAM
+10011-111xxxxxxx R/W xxxxxxxx           portion holding sprite registers
+10100--------000   W -------x           \
+10100--------001   W -------x            > to 05XX: starfield X scroll speed
+10100--------010   W -------x           /
+10100--------011   W -------x           \ to 05XX: starfield blink
+10100--------100   W -------x           /          (select active subset)
+10100--------101   W -------x           to 05XX: unknown. It is the same as STARCLR in Bosconian
+10100--------110   W -------x n.c.
+10100--------111   W -------x FLIP      flip screen
+10101-----------              n.c.
+10110-----------              n.c.
+10111-----------              n.c.
+
+void galaga_state::galaga_map(address_map &map)
+{
+	map(0x0000, 0x3fff).rom().nopw();         /* the only area different for each CPU */
+	map(0x6800, 0x6807).r(FUNC(galaga_state::bosco_dsw_r));
+	map(0x6800, 0x681f).w(m_namco_sound, FUNC(namco_device::pacman_sound_w));
+	map(0x6820, 0x6827).w("misclatch", FUNC(ls259_device::write_d0));
+	map(0x6830, 0x6830).w("watchdog", FUNC(watchdog_timer_device::reset_w));
+	map(0x7000, 0x70ff).rw("06xx", FUNC(namco_06xx_device::data_r), FUNC(namco_06xx_device::data_w));
+	map(0x7100, 0x7100).rw("06xx", FUNC(namco_06xx_device::ctrl_r), FUNC(namco_06xx_device::ctrl_w));
+	map(0x8000, 0x87ff).ram().w(FUNC(galaga_state::galaga_videoram_w)).share("videoram");
+	map(0x8800, 0x8bff).ram().share("galaga_ram1");
+	map(0x9000, 0x93ff).ram().share("galaga_ram2");
+	map(0x9800, 0x9bff).ram().share("galaga_ram3");
+	map(0xa000, 0xa007).w(m_videolatch, FUNC(ls259_device::write_d0));
+}
+
+Rom Layout:
+-----------
+
+ROM_START( galagamw )
+	ROM_REGION( 0x10000, "maincpu", 0 )     /* 64k for code for the first CPU  */
+	ROM_LOAD( "3200a.bin",    0x0000, 0x1000, CRC(3ef0b053) SHA1(0c04a362b737998c0952a753fb3fd8c8a17e9b46) )
+	ROM_LOAD( "3300b.bin",    0x1000, 0x1000, CRC(1b280831) SHA1(f7ea12e61929717ebe43a4198a97f109845a2c62) )
+	ROM_LOAD( "3400c.bin",    0x2000, 0x1000, CRC(16233d33) SHA1(a7eb799be5e23058754a92b15e6527bfbb47a354) )
+	ROM_LOAD( "3500d.bin",    0x3000, 0x1000, CRC(0aaf5c23) SHA1(3f4b0bb960bf002261e9c1278c88f594c6aa8ab6) )
+
+	ROM_REGION( 0x10000, "sub", 0 )     /* 64k for the second CPU */
+	ROM_LOAD( "3600e.bin",    0x0000, 0x1000, CRC(bc556e76) SHA1(0d3d68243c4571d985b4d8f7e0ea9f6fcffa2116) )
+
+	ROM_REGION( 0x10000, "sub2", 0 )     /* 64k for the third CPU  */
+	ROM_LOAD( "3700g.bin",    0x0000, 0x1000, CRC(b07f0aa4) SHA1(7528644a8480d0be2d0d37069515ed319e94778f) )
+
+	ROM_REGION( 0x1000, "gfx1", 0 )
+	ROM_LOAD( "2600j.bin",    0x0000, 0x1000, CRC(58b2f47c) SHA1(62f1279a784ab2f8218c4137c7accda00e6a3490) )
+
+	ROM_REGION( 0x2000, "gfx2", 0 )
+	ROM_LOAD( "2800l.bin",    0x0000, 0x1000, CRC(ad447c80) SHA1(e697c180178cabd1d32483c5d8889a40633f7857) )
+	ROM_LOAD( "2700k.bin",    0x1000, 0x1000, CRC(dd6f1afc) SHA1(c340ed8c25e0979629a9a1730edc762bd72d0cff) )
+
+	ROM_REGION( 0x0220, "proms", 0 )
+	ROM_LOAD( "prom-5.5n",    0x0000, 0x0020, CRC(54603c6b) SHA1(1a6dea13b4af155d9cb5b999a75d4f1eb9c71346) )    /* palette */
+	ROM_LOAD( "prom-4.2n",    0x0020, 0x0100, CRC(59b6edab) SHA1(0281de86c236c88739297ff712e0a4f5c8bf8ab9) )    /* char lookup table */
+	ROM_LOAD( "prom-3.1c",    0x0120, 0x0100, CRC(4a04bb6b) SHA1(cdd4bc1013f5c11984fdc4fd10e2d2e27120c1e5) )    /* sprite lookup table */
+
+	ROM_REGION( 0x0200, "namco", 0 )
+	ROM_LOAD( "prom-1.1d",    0x0000, 0x0100, CRC(7a2815b4) SHA1(085ada18c498fdb18ecedef0ea8fe9217edb7b46) )
+	ROM_LOAD( "prom-2.5c",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )    /* timing - not used */
+ROM_END

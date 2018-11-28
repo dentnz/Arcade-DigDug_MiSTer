@@ -1,0 +1,230 @@
+@dentnz 
+
+- Appears to have a custom ER2055 electrically alterable ROM chip
+- Also appears to have a custom 53XX chip?
+
+Not sure which one this is referring to, but I think its 53XX as that's referred to as being I/O in the Mame docs:
+"Dig Dug is the only one a bit different, because it reads the dip switches
+through a custom chip instead of having them mapped in memory."
+
+- Video board sounds like it's going to be different:
+"The video board, on the other hand, is completely different for all the games,
+that's why they use separate video/ source files."
+
+Dig Dug:
+-------
+CPU board:
+06XX     interface to custom 5xXX
+07XX     clock divider
+08XX(x3) bus controller
+51XX     I/O
+53XX     I/O
+Video board:
+00XX     tilemap address generator
+02XX     gfx data shifter and mixer (16-bit in, 4-bit out)
+04XX     sprite address generator
+07XX     clock divider
+
+Dig Dug:
+-------
+
+MAIN CPU:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 0     program ROM
+0001xxxxxxxxxxxx R   xxxxxxxx ROM 1     program ROM
+0010xxxxxxxxxxxx R   xxxxxxxx ROM 2     program ROM
+0011xxxxxxxxxxxx R   xxxxxxxx ROM 3     program ROM
+the rest of the memory map is common to the other CPUs
+
+SUB CPU:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 4     program ROM
+0001xxxxxxxxxxxx R   xxxxxxxx ROM 5     program ROM
+0010------------              n.c.
+0011------------              n.c.
+the rest of the memory map is common to the other CPUs
+
+SOUND CPU:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 6     program ROM
+0001xxxxxxxxxxxx R   xxxxxxxx ROM 7     program ROM (optional, not used)
+0010------------              n.c.
+0011------------              n.c.
+the rest of the memory map is common to the other CPUs
+
+COMMON:
+Address          Dir Data     Name      Description
+---------------- --- -------- --------- -----------------------
+01000-----------              n.c.
+01001-----------              n.c.
+01010-----------              n.c.
+01011-----------              n.c.
+01100-----------              n.c.
+01101-----00----   W ----xxxx AUDIO 0   \ sound control registers
+01101-----01----   W ----xxxx AUDIO 1   /
+01101-----10-000   W -------x IRQ1      main CPU irq enable/acknowledge
+01101-----10-001   W -------x IRQ2      sub CPU irq enable/acknowledge
+01101-----10-010   W -------x NMION     sound CPU nmi enable
+01101-----10-011   W -------x RESET     reset sub and sound CPU, and 5xXX chips on CPU board
+01101-----10-100   W -------x n.c.
+01101-----10-101   W -------x MOD 0     \
+01101-----10-110   W -------x MOD 1     | to custom 53XX
+01101-----10-111   W -------x MOD 2     /
+01101-----11----   W -------- WDDIS     watchdog reset
+--- to keep this on the same line as galaga memory map for visual comparison
+---
+---
+---
+---
+01110--0-------- R/W xxxxxxxx I/O       custom 06XX data
+01110--1-------- R/W xxxxxxxx I/O       custom 06XX control
+10000xxxxxxxxxxx R/W xxxxxxxx RAM 0     tilemap RAM + work RAM
+10001-xxxxxxxxxx R/W xxxxxxxx OBJRAM    work RAM
+10001-111xxxxxxx R/W xxxxxxxx           portion holding sprite registers (sprite number and color)
+10010-xxxxxxxxxx R/W xxxxxxxx POSRAM    work RAM
+10010-111xxxxxxx R/W xxxxxxxx           portion holding sprite registers (x and y)
+10011-xxxxxxxxxx R/W xxxxxxxx FLPRAM    work RAM
+10011-111xxxxxxx R/W xxxxxxxx           portion holding sprite registers (flip)
+10100--------000   W -------x           \ background ROM (114) bank select
+10100--------001   W -------x           /
+10100--------010   W -------x           tilemap color select (low or high 4 bits of tilemap RAM)
+10100--------011   W -------x           background enable
+10100--------100   W -------x           \ background color lookup PROM (112) bank select
+10100--------101   W -------x           /
+10100--------110   W -------x n.c.
+10100--------111   W -------x FLIP      flip screen
+10101-----------              n.c.
+10110-----------              n.c.
+10111----0xxxxxx   W xxxxxxxx EAROM     non volatile memory address latch and data write
+10111----0------ R   xxxxxxxx EAROM     non volatile memory read
+10111----1------   W ----xxxx EAROM     non volatile memory control
+
+
+
+
+
+
+
+
+
+
+
+
+
+MACHINE_CONFIG_START(digdug_state::digdug)
+
+	/* basic machine hardware */
+	MCFG_DEVICE_ADD("maincpu", Z80, MASTER_CLOCK/6)    /* 3.072 MHz */
+	MCFG_DEVICE_PROGRAM_MAP(digdug_map)
+
+	MCFG_DEVICE_ADD("sub", Z80, MASTER_CLOCK/6)    /* 3.072 MHz */
+	MCFG_DEVICE_PROGRAM_MAP(digdug_map)
+
+	MCFG_DEVICE_ADD("sub2", Z80, MASTER_CLOCK/6)   /* 3.072 MHz */
+	MCFG_DEVICE_PROGRAM_MAP(digdug_map)
+
+	ls259_device &misclatch(LS259(config, "misclatch")); // 8R
+	misclatch.q_out_cb<0>().set(FUNC(galaga_state::irq1_clear_w));
+	misclatch.q_out_cb<1>().set(FUNC(galaga_state::irq2_clear_w));
+	misclatch.q_out_cb<2>().set(FUNC(galaga_state::nmion_w));
+	misclatch.q_out_cb<3>().set_inputline("sub", INPUT_LINE_RESET).invert();
+	misclatch.q_out_cb<3>().append_inputline("sub2", INPUT_LINE_RESET).invert();
+	// Q5-Q7 also used (see below)
+
+	MCFG_NAMCO_51XX_ADD("51xx", MASTER_CLOCK/6/2)      /* 1.536 MHz */
+	MCFG_NAMCO_51XX_SCREEN("screen")
+	MCFG_NAMCO_51XX_INPUT_0_CB(IOPORT("IN0L"))
+	MCFG_NAMCO_51XX_INPUT_1_CB(IOPORT("IN0H"))
+	MCFG_NAMCO_51XX_INPUT_2_CB(IOPORT("IN1L"))
+	MCFG_NAMCO_51XX_INPUT_3_CB(IOPORT("IN1H"))
+	MCFG_NAMCO_51XX_OUTPUT_0_CB(WRITE8(*this, galaga_state,out_0))
+	MCFG_NAMCO_51XX_OUTPUT_1_CB(WRITE8(*this, galaga_state,out_1))
+
+	namco_53xx_device &n53xx(NAMCO_53XX(config, "53xx", MASTER_CLOCK/6/2));      /* 1.536 MHz */
+	n53xx.k_port_callback().set("misclatch", FUNC(ls259_device::q7_r)).lshift(3); // MOD 2 = K3
+	n53xx.k_port_callback().append("misclatch", FUNC(ls259_device::q6_r)).lshift(2); // MOD 1 = K2
+	n53xx.k_port_callback().append("misclatch", FUNC(ls259_device::q5_r)).lshift(1); // MOD 0 = K1
+	// K0 is left unconnected
+	n53xx.input_callback<0>().set_ioport("DSWA").mask(0x0f);
+	n53xx.input_callback<1>().set_ioport("DSWA").rshift(4);
+	n53xx.input_callback<2>().set_ioport("DSWB").mask(0x0f);
+	n53xx.input_callback<3>().set_ioport("DSWB").rshift(4);
+
+	MCFG_NAMCO_06XX_ADD("06xx", MASTER_CLOCK/6/64)
+	MCFG_NAMCO_06XX_MAINCPU("maincpu")
+	MCFG_NAMCO_06XX_READ_0_CB(READ8("51xx", namco_51xx_device, read))
+	MCFG_NAMCO_06XX_WRITE_0_CB(WRITE8("51xx", namco_51xx_device, write))
+	MCFG_NAMCO_06XX_READ_1_CB(READ8("53xx", namco_53xx_device, read))
+	MCFG_NAMCO_06XX_READ_REQUEST_1_CB(WRITELINE("53xx", namco_53xx_device, read_request))
+
+	LS259(config, m_videolatch); // 5R
+	m_videolatch->parallel_out_cb().set(FUNC(digdug_state::bg_select_w)).mask(0x33);
+	m_videolatch->q_out_cb<2>().set(FUNC(digdug_state::tx_color_mode_w));
+	m_videolatch->q_out_cb<3>().set(FUNC(digdug_state::bg_disable_w));
+	m_videolatch->q_out_cb<7>().set(FUNC(digdug_state::flip_screen_w));
+
+	MCFG_QUANTUM_TIME(attotime::from_hz(6000))  /* 100 CPU slices per frame - an high value to ensure proper */
+							/* synchronization of the CPUs */
+
+	MCFG_DEVICE_ADD("earom", ER2055)
+
+	WATCHDOG_TIMER(config, "watchdog");
+
+	/* video hardware */
+	MCFG_SCREEN_ADD(m_screen, RASTER)
+	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/3, 384, 0, 288, 264, 0, 224)
+	MCFG_SCREEN_UPDATE_DRIVER(digdug_state, screen_update_digdug)
+	MCFG_SCREEN_PALETTE("palette")
+	MCFG_SCREEN_VBLANK_CALLBACK(WRITELINE(*this, galaga_state, vblank_irq))
+
+	MCFG_DEVICE_ADD("gfxdecode", GFXDECODE, "palette", gfx_digdug)
+	MCFG_PALETTE_ADD("palette", 16*2+64*4+64*4)
+	MCFG_PALETTE_INDIRECT_ENTRIES(32)
+	MCFG_PALETTE_INIT_OWNER(digdug_state,digdug)
+	MCFG_VIDEO_START_OVERRIDE(digdug_state,digdug)
+
+	/* sound hardware */
+	SPEAKER(config, "mono").front_center();
+
+	MCFG_DEVICE_ADD("namco", NAMCO, MASTER_CLOCK/6/32)
+	MCFG_NAMCO_AUDIO_VOICES(3)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.90 * 10.0 / 16.0)
+MACHINE_CONFIG_END
+
+void galaga_state::galaga_map(address_map &map)
+{
+	map(0x0000, 0x3fff).rom().nopw();         /* the only area different for each CPU */
+	map(0x6800, 0x6807).r(FUNC(galaga_state::bosco_dsw_r));
+	map(0x6800, 0x681f).w(m_namco_sound, FUNC(namco_device::pacman_sound_w));
+	map(0x6820, 0x6827).w("misclatch", FUNC(ls259_device::write_d0));
+	map(0x6830, 0x6830).w("watchdog", FUNC(watchdog_timer_device::reset_w));
+	map(0x7000, 0x70ff).rw("06xx", FUNC(namco_06xx_device::data_r), FUNC(namco_06xx_device::data_w));
+	map(0x7100, 0x7100).rw("06xx", FUNC(namco_06xx_device::ctrl_r), FUNC(namco_06xx_device::ctrl_w));
+	map(0x8000, 0x87ff).ram().w(FUNC(galaga_state::galaga_videoram_w)).share("videoram");
+	map(0x8800, 0x8bff).ram().share("galaga_ram1");
+	map(0x9000, 0x93ff).ram().share("galaga_ram2");
+	map(0x9800, 0x9bff).ram().share("galaga_ram3");
+	map(0xa000, 0xa007).w(m_videolatch, FUNC(ls259_device::write_d0));
+}
+
+void digdug_state::digdug_map(address_map &map)
+{
+	map(0x0000, 0x3fff).rom().nopw();         /* the only area different for each CPU */
+	map(0x6800, 0x681f).w(m_namco_sound, FUNC(namco_device::pacman_sound_w));
+	map(0x6820, 0x6827).w("misclatch", FUNC(ls259_device::write_d0));
+	map(0x6830, 0x6830).w("watchdog", FUNC(watchdog_timer_device::reset_w));
+	map(0x7000, 0x70ff).rw("06xx", FUNC(namco_06xx_device::data_r), FUNC(namco_06xx_device::data_w));
+	map(0x7100, 0x7100).rw("06xx", FUNC(namco_06xx_device::ctrl_r), FUNC(namco_06xx_device::ctrl_w));
+	map(0x8000, 0x83ff).ram().w(FUNC(digdug_state::digdug_videoram_w)).share("videoram"); /* tilemap RAM (bottom half of RAM 0 */
+	map(0x8400, 0x87ff).ram().share("share1");                          /* work RAM (top half for RAM 0 */
+	map(0x8800, 0x8bff).ram().share("digdug_objram");   /* work RAM + sprite registers */
+	map(0x9000, 0x93ff).ram().share("digdug_posram");   /* work RAM + sprite registers */
+	map(0x9800, 0x9bff).ram().share("digdug_flpram");   /* work RAM + sprite registers */
+	map(0xa000, 0xa007).nopr().w(m_videolatch, FUNC(ls259_device::write_d0));   /* video latches (spurious reads when setting latch bits) */
+	map(0xb800, 0xb83f).rw(FUNC(digdug_state::earom_read), FUNC(digdug_state::earom_write));   /* non volatile memory data */
+	map(0xb840, 0xb840).w(FUNC(digdug_state::earom_control_w));                    /* non volatile memory control */
+}
+
