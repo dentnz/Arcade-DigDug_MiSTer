@@ -8,12 +8,12 @@ port (
 	data : out std_logic_vector(7 downto 0)
 );
 end entity;
-
+-- @dentnz for Digdug rom, this is file 136007.113
 architecture prom of rgb is
 	type rom is array(0 to  31) of std_logic_vector(7 downto 0);
 	signal rom_data: rom := (
-		X"F6",X"07",X"3F",X"27",X"2F",X"C7",X"F8",X"ED",X"16",X"38",X"21",X"D8",X"C4",X"C0",X"A0",X"00",
-		X"F6",X"07",X"3F",X"27",X"00",X"C7",X"F8",X"E8",X"00",X"38",X"00",X"D8",X"C5",X"C0",X"00",X"00");
+		X"00",X"2F",X"F6",X"1E",X"28",X"0D",X"36",X"04",X"80",X"5B",X"07",X"A4",X"52",X"5A",X"65",X"00",
+		X"00",X"07",X"2F",X"28",X"E8",X"F6",X"36",X"1F",X"65",X"14",X"0A",X"DF",X"D8",X"D0",X"84",X"00");
 begin
 process(clk)
 begin

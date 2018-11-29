@@ -42,8 +42,8 @@ the rest of the memory map is common to the other CPUs
 SUB CPU:
 Address          Dir Data     Name      Description
 ---------------- --- -------- --------- -----------------------
-0000xxxxxxxxxxxx R   xxxxxxxx ROM 4     program ROM
-0001xxxxxxxxxxxx R   xxxxxxxx ROM 5     program ROM
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 4     program ROM 0x4000
+0001xxxxxxxxxxxx R   xxxxxxxx ROM 5     program ROM 0x5000
 0010------------              n.c.
 0011------------              n.c.
 the rest of the memory map is common to the other CPUs
@@ -51,8 +51,8 @@ the rest of the memory map is common to the other CPUs
 SOUND CPU:
 Address          Dir Data     Name      Description
 ---------------- --- -------- --------- -----------------------
-0000xxxxxxxxxxxx R   xxxxxxxx ROM 6     program ROM
-0001xxxxxxxxxxxx R   xxxxxxxx ROM 7     program ROM (optional, not used)
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 6     program ROM 0x6000
+0001xxxxxxxxxxxx R   xxxxxxxx ROM 7     program ROM 0x7000
 0010------------              n.c.
 0011------------              n.c.
 the rest of the memory map is common to the other CPUs
@@ -216,32 +216,32 @@ ROM_START( digdug )
 	ROM_LOAD( "dd1a.4",       0x3000, 0x1000, CRC(d066f830) SHA1(b0a615fe4a5c8742c1e4ef234ef34c369d2723b9) )
 
 	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for the second CPU */
-	ROM_LOAD( "dd1a.5",       0x0000, 0x1000, CRC(6687933b) SHA1(c16144de7633595ddc1450ddce379f48e7b2195a) )
+	ROM_LOAD( "dd1a.5",       0x0000, 0x1000, CRC(6687933b) SHA1(c16144de7633595ddc1450ddce379f48e7b2195a) ) - 0x4000
 	ROM_LOAD( "dd1a.6",       0x1000, 0x1000, CRC(843d857f) SHA1(89b2ead7e478e119d33bfd67376cdf28f83de67a) )
 
 	ROM_REGION( 0x10000, "sub2", 0 ) /* 64k for the third CPU  */
-	ROM_LOAD( "dd1.7",        0x0000, 0x1000, CRC(a41bce72) SHA1(2b9b74f56aa7939d9d47cf29497ae11f10d78598) )
+	ROM_LOAD( "dd1.7",        0x0000, 0x1000, CRC(a41bce72) SHA1(2b9b74f56aa7939d9d47cf29497ae11f10d78598) ) - 0x6000
 
 	ROM_REGION( 0x1000, "gfx1", 0 )
-	ROM_LOAD( "dd1.9",        0x0000, 0x0800, CRC(f14a6fe1) SHA1(0aa63300c2cb887196de590aceb98f3cf06fead4) )
+	ROM_LOAD( "dd1.9",        0x0000, 0x0800, CRC(f14a6fe1) SHA1(0aa63300c2cb887196de590aceb98f3cf06fead4) ) - 0x7000
 
 	ROM_REGION( 0x4000, "gfx2", 0 )
-	ROM_LOAD( "dd1.15",       0x0000, 0x1000, CRC(e22957c8) SHA1(4700c63f4f680cb8ab8c44e6f3e1712aabd5daa4) )
-	ROM_LOAD( "dd1.14",       0x1000, 0x1000, CRC(2829ec99) SHA1(3e435c1afb2e44487cd7ba28a93ada2e5ccbb86d) )
+	ROM_LOAD( "dd1.15",       0x0000, 0x1000, CRC(e22957c8) SHA1(4700c63f4f680cb8ab8c44e6f3e1712aabd5daa4) ) - 0x7800
+	ROM_LOAD( "dd1.14",       0x1000, 0x1000, CRC(2829ec99) SHA1(3e435c1afb2e44487cd7ba28a93ada2e5ccbb86d) ) 
 	ROM_LOAD( "dd1.13",       0x2000, 0x1000, CRC(458499e9) SHA1(578bd839f9218c3cf4feee1223a461144e455df8) )
 	ROM_LOAD( "dd1.12",       0x3000, 0x1000, CRC(c58252a0) SHA1(bd79e39e8a572d2b5c205e6de27ca23e43ec9f51) )
 
 	ROM_REGION( 0x1000, "gfx3", 0 )
-	ROM_LOAD( "dd1.11",       0x0000, 0x1000, CRC(7b383983) SHA1(57f1e8f5171d13f9f76bd091d81b4423b59f6b42) )
+	ROM_LOAD( "dd1.11",       0x0000, 0x1000, CRC(7b383983) SHA1(57f1e8f5171d13f9f76bd091d81b4423b59f6b42) ) - 0xb800
 
 	ROM_REGION( 0x1000, "gfx4", 0 ) /* 4k for the playfield graphics */
-	ROM_LOAD( "dd1.10b",      0x0000, 0x1000, CRC(2cf399c2) SHA1(317c48818992f757b1bd0e3997fa99937f81b52c) )
+	ROM_LOAD( "dd1.10b",      0x0000, 0x1000, CRC(2cf399c2) SHA1(317c48818992f757b1bd0e3997fa99937f81b52c) ) - 0xc800
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "136007.113",   0x0000, 0x0020, CRC(4cb9da99) SHA1(91a5852a15d4672c29fdcbae75921794651f960c) )
-	ROM_LOAD( "136007.111",   0x0020, 0x0100, CRC(00c7c419) SHA1(7ea149e8eb36920c3b84984b5ce623729d492fd3) )
-	ROM_LOAD( "136007.112",   0x0120, 0x0100, CRC(e9b3e08e) SHA1(a294cc4da846eb702d61678396bfcbc87d30ea95) )
-
+	ROM_LOAD( "136007.113",   0x0000, 0x0020, CRC(4cb9da99) SHA1(91a5852a15d4672c29fdcbae75921794651f960c) ) - palette ?? -- rgb.vhd
+	ROM_LOAD( "136007.111",   0x0020, 0x0100, CRC(00c7c419) SHA1(7ea149e8eb36920c3b84984b5ce623729d492fd3) ) - char palette lookup table?? -- all zeros 
+	ROM_LOAD( "136007.112",   0x0120, 0x0100, CRC(e9b3e08e) SHA1(a294cc4da846eb702d61678396bfcbc87d30ea95) ) - sprite palette lookup table??:
+	
 	ROM_REGION( 0x0200, "namco", 0 )    /* sound prom */
 	ROM_LOAD( "136007.110",   0x0000, 0x0100, CRC(7a2815b4) SHA1(085ada18c498fdb18ecedef0ea8fe9217edb7b46) )
 	ROM_LOAD( "136007.109",   0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )    /* timing - not used */
@@ -249,15 +249,27 @@ ROM_END
 
 
 
+Extracted using this:
+https://en.webhex.net
 
 
+Sprite Palette - 136007.112
 
-
-
-
-
-
-
-
+00	06	08	01	00	02	08	0A	06	01	01	03	01	03	03	05
+03	05	05	07	02	06	08	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
+00	09	08	0B	00	02	08	0A	09	0B	0C	0E	0C	0E	09	01
+09	01	07	03	02	06	08	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
+00	09	08	0B	00	02	08	0A	09	0B	0C	09	0C	09	00	0D
+00	0D	09	0C	02	06	08	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
+00	09	08	0E	00	02	08	0A	09	0E	05	0E	05	0E	0C	0E
+0C	0E	07	0E	02	06	08	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
+00	00	00	00	00	00	00	00	00	00	00	00	00	00	00	00
 
 

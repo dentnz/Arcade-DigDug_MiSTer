@@ -39,7 +39,7 @@ the rest of the memory map is common to the other CPUs
 SOUND CPU:
 Address          Dir Data     Name      Description
 ---------------- --- -------- --------- -----------------------
-0000xxxxxxxxxxxx R   xxxxxxxx ROM 3E    program ROM
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 3E    program ROM  0x5000
 0001------------              n.c.
 0010------------              n.c.
 0011------------              n.c.
@@ -130,9 +130,9 @@ ROM_START( galagamw )
 	ROM_LOAD( "2700k.bin",    0x1000, 0x1000, CRC(dd6f1afc) SHA1(c340ed8c25e0979629a9a1730edc762bd72d0cff) )
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "prom-5.5n",    0x0000, 0x0020, CRC(54603c6b) SHA1(1a6dea13b4af155d9cb5b999a75d4f1eb9c71346) )    /* palette */
-	ROM_LOAD( "prom-4.2n",    0x0020, 0x0100, CRC(59b6edab) SHA1(0281de86c236c88739297ff712e0a4f5c8bf8ab9) )    /* char lookup table */
-	ROM_LOAD( "prom-3.1c",    0x0120, 0x0100, CRC(4a04bb6b) SHA1(cdd4bc1013f5c11984fdc4fd10e2d2e27120c1e5) )    /* sprite lookup table */
+	ROM_LOAD( "prom-5.5n",    0x0000, 0x0020, CRC(54603c6b) SHA1(1a6dea13b4af155d9cb5b999a75d4f1eb9c71346) )    /* palette */ -- zeros
+	ROM_LOAD( "prom-4.2n",    0x0020, 0x0100, CRC(59b6edab) SHA1(0281de86c236c88739297ff712e0a4f5c8bf8ab9) )    /* char lookup table */ -- zeros
+	ROM_LOAD( "prom-3.1c",    0x0120, 0x0100, CRC(4a04bb6b) SHA1(cdd4bc1013f5c11984fdc4fd10e2d2e27120c1e5) )    /* sprite lookup table */ -- zeros
 
 	ROM_REGION( 0x0200, "namco", 0 )
 	ROM_LOAD( "prom-1.1d",    0x0000, 0x0100, CRC(7a2815b4) SHA1(085ada18c498fdb18ecedef0ea8fe9217edb7b46) )
