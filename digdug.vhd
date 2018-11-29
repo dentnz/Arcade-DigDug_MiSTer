@@ -115,22 +115,22 @@ architecture struct of digdug is
  signal credit_bcd_0              : std_logic_vector( 3 downto 0);
  signal credit_bcd_1              : std_logic_vector( 3 downto 0);
  
- signal cs54XX_do         : std_logic_vector( 7 downto 0);
+-- signal cs54XX_do         : std_logic_vector( 7 downto 0);
  
- signal cs54xx_ena      : std_logic;
- signal cs54xx_ena_div  : std_logic_vector(2 downto 0) := "000";
- signal cs5Xxx_rw       : std_logic;
+-- signal cs54xx_ena      : std_logic;
+-- signal cs54xx_ena_div  : std_logic_vector(2 downto 0) := "000";
+-- signal cs5Xxx_rw       : std_logic;
  
- signal cs54xx_rom_addr : std_logic_vector(10 downto 0); 
- signal cs54xx_rom_do   : std_logic_vector( 7 downto 0); 
+-- signal cs54xx_rom_addr : std_logic_vector(10 downto 0); 
+-- signal cs54xx_rom_do   : std_logic_vector( 7 downto 0); 
  
- signal cs54xx_irq_n      : std_logic := '1'; 
- signal cs54xx_irq_cnt    : std_logic_vector( 3 downto 0); 
- signal cs54xx_k_port_in  : std_logic_vector( 3 downto 0); 
- signal cs54xx_r0_port_in : std_logic_vector( 3 downto 0); 
- signal cs54xx_audio_1    : std_logic_vector( 3 downto 0); 
- signal cs54xx_audio_2    : std_logic_vector( 3 downto 0); 
- signal cs54xx_audio_3    : std_logic_vector( 3 downto 0); 
+-- signal cs54xx_irq_n      : std_logic := '1'; 
+-- signal cs54xx_irq_cnt    : std_logic_vector( 3 downto 0); 
+-- signal cs54xx_k_port_in  : std_logic_vector( 3 downto 0); 
+-- signal cs54xx_r0_port_in : std_logic_vector( 3 downto 0); 
+-- signal cs54xx_audio_1    : std_logic_vector( 3 downto 0); 
+-- signal cs54xx_audio_2    : std_logic_vector( 3 downto 0); 
+-- signal cs54xx_audio_3    : std_logic_vector( 3 downto 0); 
 
  signal cs05XX_ctrl       : std_logic_vector( 5 downto 0);
  
@@ -186,22 +186,22 @@ architecture struct of digdug is
  signal spram2_we      : std_logic;
 
 -- @dentnz - This is galaga's starfield stuff, which isn't required but maybe we leave it in? ;)
- signal stars_hcnt      : std_logic_vector( 8 downto 0);
- signal stars_vcnt      : std_logic_vector( 8 downto 0);
- signal stars_offset    : std_logic_vector( 7 downto 0); 
- signal stars_set0_addr : std_logic_vector( 6 downto 0);
- signal stars_set0_data : std_logic_vector(15 downto 0);
- signal star_color_set0 : std_logic_vector( 5 downto 0);
- signal stars_set1_addr : std_logic_vector( 6 downto 0);
- signal stars_set1_data : std_logic_vector(15 downto 0);
- signal star_color_set1 : std_logic_vector( 5 downto 0);
- signal stars_set2_addr : std_logic_vector( 6 downto 0);
- signal stars_set2_data : std_logic_vector(15 downto 0);
- signal star_color_set2 : std_logic_vector( 5 downto 0);
- signal stars_set3_addr : std_logic_vector( 6 downto 0);
- signal stars_set3_data : std_logic_vector(15 downto 0);
- signal star_color_set3 : std_logic_vector( 5 downto 0);
- signal star_color      : std_logic_vector( 5 downto 0);
+ --signal stars_hcnt      : std_logic_vector( 8 downto 0);
+ --signal stars_vcnt      : std_logic_vector( 8 downto 0);
+ --signal stars_offset    : std_logic_vector( 7 downto 0); 
+ --signal stars_set0_addr : std_logic_vector( 6 downto 0);
+ --signal stars_set0_data : std_logic_vector(15 downto 0);
+ --signal star_color_set0 : std_logic_vector( 5 downto 0);
+ --signal stars_set1_addr : std_logic_vector( 6 downto 0);
+ --signal stars_set1_data : std_logic_vector(15 downto 0);
+ --signal star_color_set1 : std_logic_vector( 5 downto 0);
+ --signal stars_set2_addr : std_logic_vector( 6 downto 0);
+ --signal stars_set2_data : std_logic_vector(15 downto 0);
+ --signal star_color_set2 : std_logic_vector( 5 downto 0);
+ --signal stars_set3_addr : std_logic_vector( 6 downto 0);
+ --signal stars_set3_data : std_logic_vector(15 downto 0);
+ --signal star_color_set3 : std_logic_vector( 5 downto 0);
+ --signal star_color      : std_logic_vector( 5 downto 0);
  
  signal irq1_clr_n  : std_logic;
  signal irq2_clr_n  : std_logic;
@@ -238,7 +238,9 @@ dip_switch_b <= "10010111"; --lives:7-6/ bonus:5-3 / coinage:2-0
 dip_switch_do <= 	dip_switch_a(to_integer(unsigned(mux_addr(3 downto 0)))) & 
 									dip_switch_b(to_integer(unsigned(mux_addr(3 downto 0))));
 
-audio <= ("00" & cs54xx_audio_1 &  "0000" ) + ("00" & cs54xx_audio_2 &  "0000" )+ ('0'&snd_audio(9 downto 1));
+--audio <= ("00" & cs54xx_audio_1 &  "0000" ) + ("00" & cs54xx_audio_2 &  "0000" )+ ('0'&snd_audio(9 downto 1));
+
+audio <= '0' & snd_audio(9 downto 1);
 
 -- make access slots from 18MHz
 -- 6MHz for pixel clock and sound machine
@@ -258,11 +260,11 @@ begin
   cpu1_ena   <= '0';
   cpu2_ena   <= '0';
   cpu3_ena   <= '0';
-  cs54xx_ena <= '0';
+ -- cs54xx_ena <= '0';
 	
   if slot = "101" then
    slot <= (others => '0');
-	cs54xx_ena_div <= cs54xx_ena_div +'1';
+	--cs54xx_ena_div <= cs54xx_ena_div +'1';
 	else
 		slot <= std_logic_vector(unsigned(slot) + 1);
   end if;   
@@ -273,7 +275,7 @@ begin
 	if slot = "000" then cpu2_ena <= '1';	end if;	
 	if slot = "001" then cpu3_ena <= '1';	end if;
 	
-	if slot = "000" and cs54xx_ena_div = "000" then cs54xx_ena <= '1'; end if;
+	--if slot = "000" and cs54xx_ena_div = "000" then cs54xx_ena <= '1'; end if;
 		
  end if;
 end process;
@@ -444,98 +446,98 @@ bgbits <= bgpalette_do(3 downto 0);
 --- STARS MACHINE --- 
 ---------------------
 
-stars_data : entity work.stars
-port map(
-	clk       => clock_18n,
-	addr_set0 => stars_set0_addr,
-	data_set0 => stars_set0_data,
-	addr_set1 => stars_set1_addr,
-	data_set1 => stars_set1_data,
-	addr_set2 => stars_set2_addr,
-	data_set2 => stars_set2_data,
-	addr_set3 => stars_set3_addr,
-	data_set3 => stars_set3_data
-);
+--stars_data : entity work.stars
+--port map(
+--	clk       => clock_18n,
+--	addr_set0 => stars_set0_addr,
+--	data_set0 => stars_set0_data,
+--	addr_set1 => stars_set1_addr,
+--	data_set1 => stars_set1_data,
+--	addr_set2 => stars_set2_addr,
+--	data_set2 => stars_set2_data,
+--	addr_set3 => stars_set3_addr,
+--	data_set3 => stars_set3_data
+--);
 
-stars_machine_0 : entity work.stars_machine
-port  map(
-	clk              => clock_18,
-	ena_hcnt         => ena_vidgen,
-	hcnt             => stars_hcnt,
-	vcnt             => stars_vcnt,
-	stars_set_addr_o => stars_set0_addr,
-  stars_set_data   => stars_set0_data,
-  offset_y         => stars_offset,
-  star_color       => star_color_set0
-);
+--stars_machine_0 : entity work.stars_machine
+--port  map(
+--	clk              => clock_18,
+--	ena_hcnt         => ena_vidgen,
+--	hcnt             => stars_hcnt,
+--	vcnt             => stars_vcnt,
+--	stars_set_addr_o => stars_set0_addr,
+--  stars_set_data   => stars_set0_data,
+--  offset_y         => stars_offset,
+--  star_color       => star_color_set0
+--);
 
-stars_machine_1 : entity work.stars_machine
-port  map(
-	clk              => clock_18,
-	ena_hcnt         => ena_vidgen,
-	hcnt             => stars_hcnt,
-	vcnt             => stars_vcnt,
-	stars_set_addr_o => stars_set1_addr,
-  stars_set_data   => stars_set1_data,
-  offset_y         => stars_offset,
-  star_color       => star_color_set1
-);
+--stars_machine_1 : entity work.stars_machine
+--port  map(
+--	clk              => clock_18,
+--	ena_hcnt         => ena_vidgen,
+--	hcnt             => stars_hcnt,
+--	vcnt             => stars_vcnt,
+--	stars_set_addr_o => stars_set1_addr,
+--  stars_set_data   => stars_set1_data,
+--  offset_y         => stars_offset,
+--  star_color       => star_color_set1
+--);
 
-stars_machine_2 : entity work.stars_machine
-port  map(
-	clk              => clock_18,
-	ena_hcnt         => ena_vidgen,
-	hcnt             => stars_hcnt,
-	vcnt             => stars_vcnt,
-	stars_set_addr_o => stars_set2_addr,
-  stars_set_data   => stars_set2_data,
-  offset_y         => stars_offset,
-  star_color       => star_color_set2
-);
+--stars_machine_2 : entity work.stars_machine
+--port  map(
+--	clk              => clock_18,
+--	ena_hcnt         => ena_vidgen,
+--	hcnt             => stars_hcnt,
+--	vcnt             => stars_vcnt,
+--	stars_set_addr_o => stars_set2_addr,
+--  stars_set_data   => stars_set2_data,
+--  offset_y         => stars_offset,
+--  star_color       => star_color_set2
+--);
 
-stars_machine_3 : entity work.stars_machine
-port  map(
-	clk              => clock_18,
-	ena_hcnt         => ena_vidgen,
-	hcnt             => stars_hcnt,
-	vcnt             => stars_vcnt,
-	stars_set_addr_o => stars_set3_addr,
-  stars_set_data   => stars_set3_data,
-  offset_y         => stars_offset,
-  star_color       => star_color_set3
-);
+--stars_machine_3 : entity work.stars_machine
+--port  map(
+--	clk              => clock_18,
+--	ena_hcnt         => ena_vidgen,
+--	hcnt             => stars_hcnt,
+--	vcnt             => stars_vcnt,
+--	stars_set_addr_o => stars_set3_addr,
+--  stars_set_data   => stars_set3_data,
+--  offset_y         => stars_offset,
+--  star_color       => star_color_set3
+--);
 
-process (clock_18)
-	subtype speed is integer range -3 to 3;
-	type speed_array is array(0 to 7) of speed; 
-	variable speeds : speed_array := ( -1, -2, -3, 0, 3, 2, 1, 0 ); 
-begin
- if rising_edge(clock_18) then 
+--process (clock_18)
+--	subtype speed is integer range -3 to 3;
+--	type speed_array is array(0 to 7) of speed; 
+--	variable speeds : speed_array := ( -1, -2, -3, 0, 3, 2, 1, 0 ); 
+--begin
+-- if rising_edge(clock_18) then 
 
-	if ena_vidgen = '1' then
-		if hcnt = std_logic_vector(to_unsigned(256+8,9)) then
-			stars_hcnt <= "000000000";
-			stars_vcnt <= stars_vcnt + "000000001";
-			if vcnt = std_logic_vector(to_unsigned(128+6,9)) then
-				stars_vcnt <= "000000000";
-				stars_offset <= stars_offset + 
-					std_logic_vector(to_signed(speeds(to_integer(unsigned(cs05XX_ctrl(2 downto 0)))),8));
-			end if;
-		else
-			stars_hcnt <= stars_hcnt + "000000001";
-		end if;	
-	end if; 
-	
-	star_color <= "000000";
-	if cs05XX_ctrl(5) = '1' then
-		if cs05XX_ctrl(4 downto 3) = "00" then star_color <= star_color_set0 or star_color_set2; end if;
-		if cs05XX_ctrl(4 downto 3) = "01" then star_color <= star_color_set1 or star_color_set2; end if;
-		if cs05XX_ctrl(4 downto 3) = "10" then star_color <= star_color_set0 or star_color_set3; end if;
-		if cs05XX_ctrl(4 downto 3) = "11" then star_color <= star_color_set1 or star_color_set3; end if;
-	end if;
-
- end if;
-end process; 
+--	if ena_vidgen = '1' then
+--		if hcnt = std_logic_vector(to_unsigned(256+8,9)) then
+--			stars_hcnt <= "000000000";
+--			stars_vcnt <= stars_vcnt + "000000001";
+--			if vcnt = std_logic_vector(to_unsigned(128+6,9)) then
+--				stars_vcnt <= "000000000";
+--				stars_offset <= stars_offset + 
+--					std_logic_vector(to_signed(speeds(to_integer(unsigned(cs05XX_ctrl(2 downto 0)))),8));
+--			end if;
+--		else
+--			stars_hcnt <= stars_hcnt + "000000001";
+--		end if;	
+--	end if; 
+--	
+--	star_color <= "000000";
+--	if cs05XX_ctrl(5) = '1' then
+--		if cs05XX_ctrl(4 downto 3) = "00" then star_color <= star_color_set0 or star_color_set2; end if;
+--		if cs05XX_ctrl(4 downto 3) = "01" then star_color <= star_color_set1 or star_color_set2; end if;
+--		if cs05XX_ctrl(4 downto 3) = "10" then star_color <= star_color_set0 or star_color_set3; end if;
+--		if cs05XX_ctrl(4 downto 3) = "11" then star_color <= star_color_set1 or star_color_set3; end if;
+--	end if;
+--
+-- end if;
+--end process; 
 	
 --- VIDEO MUX ---
 -----------------
@@ -546,9 +548,9 @@ process (clock_18, rgb_palette_addr)
 begin
  if rising_edge(clock_18)then
   if rgb_palette_addr(3 downto 0) = "1111" then
-		video_r <= star_color(1 downto 0) & "0";
-		video_g <= star_color(3 downto 2) & "0";
-		video_b <= star_color(5 downto 4);		
+--		video_r <= star_color(1 downto 0) & "0";
+--		video_g <= star_color(3 downto 2) & "0";
+--		video_b <= star_color(5 downto 4);		
 	else
 		video_r <= rgb_palette_do(2 downto 0);
 		video_g <= rgb_palette_do(5 downto 3);
@@ -625,8 +627,8 @@ begin
 			cs51XX_credit_mode <= '1';
 			cs05XX_ctrl <= "000000";
 			flip_h <= '0';
-			cs54xx_irq_n <= '1';
-			cs54xx_irq_cnt <= X"0";
+--			cs54xx_irq_n <= '1';
+--			cs54xx_irq_cnt <= X"0";
 			
  else 
   if rising_edge(clock_18n) then 
@@ -651,13 +653,13 @@ begin
 		elsif vcnt = std_logic_vector(to_unsigned(240,9)) then cpu2_irq_n <= '0';
 		end if;
 		
-		if cs54xx_irq_cnt = X"0" then 
-		  cs54xx_irq_n <= '1';
-		else 
-			if cs54xx_ena = '1' then
-				cs54xx_irq_cnt <= cs54xx_irq_cnt - '1';
-			end if;
-		end if;
+--		if cs54xx_irq_cnt = X"0" then 
+--		  cs54xx_irq_n <= '1';
+--		else 
+--			if cs54xx_ena = '1' then
+--				cs54xx_irq_cnt <= cs54xx_irq_cnt - '1';
+--			end if;
+--		end if;
 		
 		-- write to cs06XX
 		if io_we = '1' then 
@@ -667,10 +669,10 @@ begin
 				-- write data to device#4 (cs54XX)
 				if cs06XX_control(3 downto 0) = "1000" then
 						-- write data for k and r#0 port and launch irq to advice cs50xx
-						cs54xx_k_port_in <= mux_cpu_do(7 downto 4);
-						cs54xx_r0_port_in <= mux_cpu_do(3 downto 0);
-						cs54xx_irq_n <= '0';
-						cs54xx_irq_cnt <= X"7";						
+--						cs54xx_k_port_in <= mux_cpu_do(7 downto 4);
+--						cs54xx_r0_port_in <= mux_cpu_do(3 downto 0);
+--						cs54xx_irq_n <= '0';
+--						cs54xx_irq_cnt <= X"7";						
 				end if;		  
 				-- write data to device#1 (cs51XX)
 				if cs06XX_control(3 downto 0) = "0001" then
@@ -816,11 +818,11 @@ cs51XX_non_switch_mode_do <= 	credit_bcd_1 & credit_bcd_0 when "00", -- credits 
 
 cs51XX_do <= cs51XX_switch_mode_do when cs51XX_switch_mode = '1' else cs51XX_non_switch_mode_do;
 
-cs54XX_do <= X"FF"; -- no data from CS54XX
+--cs54XX_do <= X"FF"; -- no data from CS54XX
 
 with cs06XX_control(3 downto 0) select
 cs06XX_di <= cs51XX_do when "0001",
-						 cs54XX_do when "1000",
+--						 cs54XX_do when "1000",
 						 X"00" when others;
 
 cs06XX_do <= cs06XX_di when mux_addr(8)= '0' else cs06XX_control;
@@ -965,55 +967,55 @@ port map(
 );
 
 -- mb88 - cs54xx (28 pins IC, 1024 bytes rom)
-mb88_54xx : entity work.mb88
-port map(
- reset_n    => reset_cpu_n, --reset_n,
- clock      => clock_18,
- ena        => cs54xx_ena,
+--mb88_54xx : entity work.mb88
+--port map(
+-- reset_n    => reset_cpu_n, --reset_n,
+-- clock      => clock_18,
+-- ena        => cs54xx_ena,
 
- r0_port_in  => cs54xx_r0_port_in, -- pin 12,13,15,16
- r1_port_in  => X"0",
- r2_port_in  => X"0",
- r3_port_in  => X"0",
- r0_port_out => open,
- r1_port_out => cs54xx_audio_3,   -- pin 17,18,19,20 (resistor divider )
- r2_port_out => open,
- r3_port_out => open,
- k_port_in   => cs54xx_k_port_in, -- pin 24,25,26,27
- ol_port_out => cs54xx_audio_1,   -- pin  4, 5, 6, 7 (resistor divider 150K/22K)
- oh_port_out => cs54xx_audio_2,   -- pin  8, 9,10,11 (resistor divider  47K/10K)
- p_port_out  => open,
+-- r0_port_in  => cs54xx_r0_port_in, -- pin 12,13,15,16
+-- r1_port_in  => X"0",
+-- r2_port_in  => X"0",
+-- r3_port_in  => X"0",
+-- r0_port_out => open,
+-- r1_port_out => cs54xx_audio_3,   -- pin 17,18,19,20 (resistor divider )
+-- r2_port_out => open,
+-- r3_port_out => open,
+-- k_port_in   => cs54xx_k_port_in, -- pin 24,25,26,27
+-- ol_port_out => cs54xx_audio_1,   -- pin  4, 5, 6, 7 (resistor divider 150K/22K)
+-- oh_port_out => cs54xx_audio_2,   -- pin  8, 9,10,11 (resistor divider  47K/10K)
+-- p_port_out  => open,
 
- stby_n    => '0',
- tc_n      => '0',
- irq_n     => cs54xx_irq_n,
- sc_in_n   => '0',
- si_n      => '0',
- sc_out_n  => open,
- so_n      => open,
- to_n      => open,
+-- stby_n    => '0',
+-- tc_n      => '0',
+-- irq_n     => cs54xx_irq_n,
+-- sc_in_n   => '0',
+-- si_n      => '0',
+-- sc_out_n  => open,
+-- so_n      => open,
+-- to_n      => open,
  
- rom_addr  => cs54xx_rom_addr,
- rom_data  => cs54xx_rom_do
-);
+-- rom_addr  => cs54xx_rom_addr,
+-- rom_data  => cs54xx_rom_do
+--);
 
 -- @dentnz - Load ROM into the DigDug Memory Map
 
 -- cs54xx program ROM
 -- @dentnz - we probably don't need to program this custom chip with code... Remove it later
 -- @dentnz - need to work out what we do with romm_cs
-cs54xx_prog : work.dpram generic map (10,8)
-port map
-(
-	clock_a   => clock_18,
-	wren_a    => dn_wr and romm_cs,
-	address_a => dn_addr(9 downto 0),
-	data_a    => dn_data,
-
-	clock_b   => clock_18n,
-	address_b => cs54xx_rom_addr(9 downto 0),
-	q_b       => cs54xx_rom_do
-);
+--cs54xx_prog : work.dpram generic map (10,8)
+--port map
+--(
+--	clock_a   => clock_18,
+--	wren_a    => dn_wr and romm_cs,
+--	address_a => dn_addr(9 downto 0),
+--	data_a    => dn_data,
+--
+--	clock_b   => clock_18n,
+--	address_b => cs54xx_rom_addr(9 downto 0),
+--	q_b       => cs54xx_rom_do
+--);
 
 -- @dentnz - this bit is mapping the rom sent across from MiSTer for the three Z80 CPUs
 
