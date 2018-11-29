@@ -836,6 +836,7 @@ begin
  end if;
 end process;
 
+-- @dentnz - what is this doing?
 with cpu1_addr(15 downto 11) select
 cpu1_di <= 	cpu1_rom_do when "00000",
 						cpu1_rom_do when "00001",
@@ -996,7 +997,11 @@ port map(
  rom_data  => cs54xx_rom_do
 );
 
+-- @dentnz - Load ROM into the DigDug Memory Map
+
 -- cs54xx program ROM
+-- @dentnz - we probably don't need to program this custom chip with code... Remove it later
+-- @dentnz - need to work out what we do with romm_cs
 cs54xx_prog : work.dpram generic map (10,8)
 port map
 (
@@ -1010,12 +1015,38 @@ port map
 	q_b       => cs54xx_rom_do
 );
 
-rom1_cs <= '1' when dn_addr(15 downto 14) = "00"     else '0';
-rom2_cs <= '1' when dn_addr(15 downto 12) = "0100"   else '0';
-rom3_cs <= '1' when dn_addr(15 downto 12) = "0101"   else '0';
-roms_cs <= '1' when dn_addr(15 downto 13) = "011"    else '0';
-romb_cs <= '1' when dn_addr(15 downto 12) = "1000"   else '0';
-romm_cs <= '1' when dn_addr(15 downto 10) = "100100" else '0';
+-- @dentnz - this bit is mapping the rom sent across from MiSTer for the three Z80 CPUs
+
+-- MAIN CPU:
+-- Address          Dir Data     Name      Description
+---------------- --- -------- --------- ------------------------
+-- 0000xxxxxxxxxxxx R   xxxxxxxx ROM 0     program ROM    0x0000
+-- 0001xxxxxxxxxxxx R   xxxxxxxx ROM 1     program ROM
+-- 0010xxxxxxxxxxxx R   xxxxxxxx ROM 2     program ROM
+-- 0011xxxxxxxxxxxx R   xxxxxxxx ROM 3     program ROM
+
+-- SUB CPU:
+-- Address          Dir Data     Name      Description
+---------------- --- -------- --------- ------------------------
+-- 0000xxxxxxxxxxxx R   xxxxxxxx ROM 4     program ROM    0x4000
+-- 0001xxxxxxxxxxxx R   xxxxxxxx ROM 5     program ROM
+
+-- SOUND CPU:
+-- Address          Dir Data     Name      Description
+---------------- --- -------- --------- ------------------------
+-- 0000xxxxxxxxxxxx R   xxxxxxxx ROM 6     program ROM    0x6000
+-- 0001xxxxxxxxxxxx R   xxxxxxxx ROM 7     program ROM (optional, not used) -- NOT USED IN MAME, so ignoring
+
+
+rom1_cs <= '1' when dn_addr(15 downto 14) = "00"     else '0'; -- 0000 0000 0000 0000 = 0x0000  - 'maincpu'        - 16k
+rom2_cs <= '1' when dn_addr(15 downto 12) = "0100"   else '0'; -- 0100 0000 0000 0000 = 0X4000  - 'sub'            - 8k 
+rom3_cs <= '1' when dn_addr(15 downto 12) = "0110"   else '0'; -- 0110 0000 0000 0000 = 0x6000  - 'sub2'           - 4k
+
+-- Graphics ROM -- Note that we have a clash here, romm_cs needs to be 8k for graphics, NOT cs54xx
+
+roms_cs <= '1' when dn_addr(15 downto 12) = "0111"   else '0'; -- 0111 0000 0000 0000 = 0x7000  - 'gfx1'           - 2k
+romb_cs <= '1' when dn_addr(15 downto 11) = "01111"  else '0'; -- 0111 1000 0000 0000 = 0x7800  - 'gfx2'           - 16k
+romm_cs <= '1' when dn_addr(15 downto 11) = "10111"  else '0'; -- 1011 1000 0000 0000 = 0xb800  - 'gfx3' + 'gfx4'? - 8k
 
 -- cpu1 program ROM
 rom_cpu1 : work.dpram generic map (14,8)

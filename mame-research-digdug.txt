@@ -11,22 +11,24 @@ through a custom chip instead of having them mapped in memory."
 "The video board, on the other hand, is completely different for all the games,
 that's why they use separate video/ source files."
 
-Dig Dug:
--------
+Dig Dug PCBs:
+-------------
+
 CPU board:
 06XX     interface to custom 5xXX
 07XX     clock divider
 08XX(x3) bus controller
 51XX     I/O
-53XX     I/O
+53XX     I/O <- This is for dip switches
+
 Video board:
 00XX     tilemap address generator
 02XX     gfx data shifter and mixer (16-bit in, 4-bit out)
 04XX     sprite address generator
 07XX     clock divider
 
-Dig Dug:
--------
+Dig Dug Memory Map:
+-------------------
 
 MAIN CPU:
 Address          Dir Data     Name      Description
@@ -102,17 +104,26 @@ Address          Dir Data     Name      Description
 10111----0------ R   xxxxxxxx EAROM     non volatile memory read
 10111----1------   W ----xxxx EAROM     non volatile memory control
 
+void digdug_state::digdug_map(address_map &map)
+{
+	map(0x0000, 0x3fff).rom().nopw();         /* the only area different for each CPU */
+	map(0x6800, 0x681f).w(m_namco_sound, FUNC(namco_device::pacman_sound_w));
+	map(0x6820, 0x6827).w("misclatch", FUNC(ls259_device::write_d0));
+	map(0x6830, 0x6830).w("watchdog", FUNC(watchdog_timer_device::reset_w));
+	map(0x7000, 0x70ff).rw("06xx", FUNC(namco_06xx_device::data_r), FUNC(namco_06xx_device::data_w));
+	map(0x7100, 0x7100).rw("06xx", FUNC(namco_06xx_device::ctrl_r), FUNC(namco_06xx_device::ctrl_w));
+	map(0x8000, 0x83ff).ram().w(FUNC(digdug_state::digdug_videoram_w)).share("videoram"); /* tilemap RAM (bottom half of RAM 0 */
+	map(0x8400, 0x87ff).ram().share("share1");                          /* work RAM (top half for RAM 0 */
+	map(0x8800, 0x8bff).ram().share("digdug_objram");   /* work RAM + sprite registers */
+	map(0x9000, 0x93ff).ram().share("digdug_posram");   /* work RAM + sprite registers */
+	map(0x9800, 0x9bff).ram().share("digdug_flpram");   /* work RAM + sprite registers */
+	map(0xa000, 0xa007).nopr().w(m_videolatch, FUNC(ls259_device::write_d0));   /* video latches (spurious reads when setting latch bits) */
+	map(0xb800, 0xb83f).rw(FUNC(digdug_state::earom_read), FUNC(digdug_state::earom_write));   /* non volatile memory data */
+	map(0xb840, 0xb840).w(FUNC(digdug_state::earom_control_w));                    /* non volatile memory control */
+}
 
-
-
-
-
-
-
-
-
-
-
+DigDug Machine Init:
+--------------------
 
 MACHINE_CONFIG_START(digdug_state::digdug)
 
@@ -194,37 +205,59 @@ MACHINE_CONFIG_START(digdug_state::digdug)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.90 * 10.0 / 16.0)
 MACHINE_CONFIG_END
 
-void galaga_state::galaga_map(address_map &map)
-{
-	map(0x0000, 0x3fff).rom().nopw();         /* the only area different for each CPU */
-	map(0x6800, 0x6807).r(FUNC(galaga_state::bosco_dsw_r));
-	map(0x6800, 0x681f).w(m_namco_sound, FUNC(namco_device::pacman_sound_w));
-	map(0x6820, 0x6827).w("misclatch", FUNC(ls259_device::write_d0));
-	map(0x6830, 0x6830).w("watchdog", FUNC(watchdog_timer_device::reset_w));
-	map(0x7000, 0x70ff).rw("06xx", FUNC(namco_06xx_device::data_r), FUNC(namco_06xx_device::data_w));
-	map(0x7100, 0x7100).rw("06xx", FUNC(namco_06xx_device::ctrl_r), FUNC(namco_06xx_device::ctrl_w));
-	map(0x8000, 0x87ff).ram().w(FUNC(galaga_state::galaga_videoram_w)).share("videoram");
-	map(0x8800, 0x8bff).ram().share("galaga_ram1");
-	map(0x9000, 0x93ff).ram().share("galaga_ram2");
-	map(0x9800, 0x9bff).ram().share("galaga_ram3");
-	map(0xa000, 0xa007).w(m_videolatch, FUNC(ls259_device::write_d0));
-}
+Rom Layout:
+===========
 
-void digdug_state::digdug_map(address_map &map)
-{
-	map(0x0000, 0x3fff).rom().nopw();         /* the only area different for each CPU */
-	map(0x6800, 0x681f).w(m_namco_sound, FUNC(namco_device::pacman_sound_w));
-	map(0x6820, 0x6827).w("misclatch", FUNC(ls259_device::write_d0));
-	map(0x6830, 0x6830).w("watchdog", FUNC(watchdog_timer_device::reset_w));
-	map(0x7000, 0x70ff).rw("06xx", FUNC(namco_06xx_device::data_r), FUNC(namco_06xx_device::data_w));
-	map(0x7100, 0x7100).rw("06xx", FUNC(namco_06xx_device::ctrl_r), FUNC(namco_06xx_device::ctrl_w));
-	map(0x8000, 0x83ff).ram().w(FUNC(digdug_state::digdug_videoram_w)).share("videoram"); /* tilemap RAM (bottom half of RAM 0 */
-	map(0x8400, 0x87ff).ram().share("share1");                          /* work RAM (top half for RAM 0 */
-	map(0x8800, 0x8bff).ram().share("digdug_objram");   /* work RAM + sprite registers */
-	map(0x9000, 0x93ff).ram().share("digdug_posram");   /* work RAM + sprite registers */
-	map(0x9800, 0x9bff).ram().share("digdug_flpram");   /* work RAM + sprite registers */
-	map(0xa000, 0xa007).nopr().w(m_videolatch, FUNC(ls259_device::write_d0));   /* video latches (spurious reads when setting latch bits) */
-	map(0xb800, 0xb83f).rw(FUNC(digdug_state::earom_read), FUNC(digdug_state::earom_write));   /* non volatile memory data */
-	map(0xb840, 0xb840).w(FUNC(digdug_state::earom_control_w));                    /* non volatile memory control */
-}
+ROM_START( digdug )
+	ROM_REGION( 0x10000, "maincpu", 0 ) /* 64k for code for the first CPU  */
+	ROM_LOAD( "dd1a.1",       0x0000, 0x1000, CRC(a80ec984) SHA1(86689980410b9429cd7582c7a76342721c87d030) )
+	ROM_LOAD( "dd1a.2",       0x1000, 0x1000, CRC(559f00bd) SHA1(fde17785df21956d6fd06bcfe675c392dadb1524) )
+	ROM_LOAD( "dd1a.3",       0x2000, 0x1000, CRC(8cbc6fe1) SHA1(57b8a5777f8bb9773caf0cafe5408c8b9768cb25) )
+	ROM_LOAD( "dd1a.4",       0x3000, 0x1000, CRC(d066f830) SHA1(b0a615fe4a5c8742c1e4ef234ef34c369d2723b9) )
+
+	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for the second CPU */
+	ROM_LOAD( "dd1a.5",       0x0000, 0x1000, CRC(6687933b) SHA1(c16144de7633595ddc1450ddce379f48e7b2195a) )
+	ROM_LOAD( "dd1a.6",       0x1000, 0x1000, CRC(843d857f) SHA1(89b2ead7e478e119d33bfd67376cdf28f83de67a) )
+
+	ROM_REGION( 0x10000, "sub2", 0 ) /* 64k for the third CPU  */
+	ROM_LOAD( "dd1.7",        0x0000, 0x1000, CRC(a41bce72) SHA1(2b9b74f56aa7939d9d47cf29497ae11f10d78598) )
+
+	ROM_REGION( 0x1000, "gfx1", 0 )
+	ROM_LOAD( "dd1.9",        0x0000, 0x0800, CRC(f14a6fe1) SHA1(0aa63300c2cb887196de590aceb98f3cf06fead4) )
+
+	ROM_REGION( 0x4000, "gfx2", 0 )
+	ROM_LOAD( "dd1.15",       0x0000, 0x1000, CRC(e22957c8) SHA1(4700c63f4f680cb8ab8c44e6f3e1712aabd5daa4) )
+	ROM_LOAD( "dd1.14",       0x1000, 0x1000, CRC(2829ec99) SHA1(3e435c1afb2e44487cd7ba28a93ada2e5ccbb86d) )
+	ROM_LOAD( "dd1.13",       0x2000, 0x1000, CRC(458499e9) SHA1(578bd839f9218c3cf4feee1223a461144e455df8) )
+	ROM_LOAD( "dd1.12",       0x3000, 0x1000, CRC(c58252a0) SHA1(bd79e39e8a572d2b5c205e6de27ca23e43ec9f51) )
+
+	ROM_REGION( 0x1000, "gfx3", 0 )
+	ROM_LOAD( "dd1.11",       0x0000, 0x1000, CRC(7b383983) SHA1(57f1e8f5171d13f9f76bd091d81b4423b59f6b42) )
+
+	ROM_REGION( 0x1000, "gfx4", 0 ) /* 4k for the playfield graphics */
+	ROM_LOAD( "dd1.10b",      0x0000, 0x1000, CRC(2cf399c2) SHA1(317c48818992f757b1bd0e3997fa99937f81b52c) )
+
+	ROM_REGION( 0x0220, "proms", 0 )
+	ROM_LOAD( "136007.113",   0x0000, 0x0020, CRC(4cb9da99) SHA1(91a5852a15d4672c29fdcbae75921794651f960c) )
+	ROM_LOAD( "136007.111",   0x0020, 0x0100, CRC(00c7c419) SHA1(7ea149e8eb36920c3b84984b5ce623729d492fd3) )
+	ROM_LOAD( "136007.112",   0x0120, 0x0100, CRC(e9b3e08e) SHA1(a294cc4da846eb702d61678396bfcbc87d30ea95) )
+
+	ROM_REGION( 0x0200, "namco", 0 )    /* sound prom */
+	ROM_LOAD( "136007.110",   0x0000, 0x0100, CRC(7a2815b4) SHA1(085ada18c498fdb18ecedef0ea8fe9217edb7b46) )
+	ROM_LOAD( "136007.109",   0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )    /* timing - not used */
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

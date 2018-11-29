@@ -21,16 +21,16 @@ Galaga Memory Map:
 MAIN CPU:
 Address          Dir Data     Name      Description
 ---------------- --- -------- --------- -----------------------
-0000xxxxxxxxxxxx R   xxxxxxxx ROM 3N    program ROM
-0001xxxxxxxxxxxx R   xxxxxxxx ROM 3M    program ROM
-0010xxxxxxxxxxxx R   xxxxxxxx ROM 3L    program ROM
-0011xxxxxxxxxxxx R   xxxxxxxx ROM 3K    program ROM
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 3N    program ROM  0x0000
+0001xxxxxxxxxxxx R   xxxxxxxx ROM 3M    program ROM  0x1000
+0010xxxxxxxxxxxx R   xxxxxxxx ROM 3L    program ROM  0x2000
+0011xxxxxxxxxxxx R   xxxxxxxx ROM 3K    program ROM  0x3000
 the rest of the memory map is common to the other CPUs
 
 SUB CPU:
 Address          Dir Data     Name      Description
 ---------------- --- -------- --------- -----------------------
-0000xxxxxxxxxxxx R   xxxxxxxx ROM 3J    program ROM
+0000xxxxxxxxxxxx R   xxxxxxxx ROM 3J    program ROM  0x4000
 0001------------              n.c.
 0010------------              n.c.
 0011------------              n.c.
@@ -138,3 +138,24 @@ ROM_START( galagamw )
 	ROM_LOAD( "prom-1.1d",    0x0000, 0x0100, CRC(7a2815b4) SHA1(085ada18c498fdb18ecedef0ea8fe9217edb7b46) )
 	ROM_LOAD( "prom-2.5c",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )    /* timing - not used */
 ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
