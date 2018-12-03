@@ -1047,7 +1047,7 @@ rom3_cs <= '1' when dn_addr(15 downto 12) = "0110"   else '0'; -- 0110 0000 0000
 -- Graphics ROM -- Note that we have a clash here, romm_cs needs to be 8k for graphics, NOT cs54xx
 
 roms_cs <= '1' when dn_addr(15 downto 11) = "01110"  else '0'; -- 0111 0000 0000 0000 = 0x7000  - 'gfx1'           - 2k
-romb_cs <= '1' when (dn_addr(15 downto 11) = "01111") or (dn_addr(15 downto 14) = "10" and dn_addr(13 downto 11) != "111") or   else '0'; -- 0111 1000 0000 0000 = 0x7800  - 'gfx2'           - 16k
+romb_cs <= '1' when (dn_addr(15 downto 11) = "01111") or (dn_addr(15 downto 14) = "10" and dn_addr(13 downto 11) != "111")  else '0'; -- 0111 1000 0000 0000 = 0x7800  - 'gfx2'           - 16k
 romm_cs <= '1' when (dn_addr(15 downto 11) = "10111") or (dn_addr(15 downto 14) = "11") else '0'; -- 1011 1000 0000 0000 = 0xb800  - 'gfx3' + 'gfx4'? - 8k
 
 -- cpu1 program ROM
